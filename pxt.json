@@ -4,17 +4,14 @@
     "description": "",
     "dependencies": {
         "core": "*",
-        "radio": "*",
-        "microphone": "*"
+        "robot": "github:hslotholt/pxt-nezha2-odometry",
+        "linesensor": "github:hslotholt/pxt-linesensor8pixel"
     },
     "files": [
         "README.md",
-        "main.blocks",
         "main.ts"
     ],
-    "testFiles": [
-        "test.ts"
-    ],
+    "testFiles": [],
     "public": true,
     "targetVersions": {
         "target": "9.0.12",
@@ -23,5 +20,5 @@
     "supportedTargets": [
         "microbit"
     ],
-    "preferredEditor": "blocksprj"
+    "preferredEditor": "tsprj"
 }
