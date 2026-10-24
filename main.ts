@@ -1,7 +1,7 @@
 //% color=#2876A8 icon="\uf018" block="Linjefølgning"
 namespace robotLineFollowing {
     export enum LineStopCondition {
-        //% block="aldrig automatisk"
+        //% block="aldrig/distance"
         Never = 0,
         //% block="udgrening"
         Junction = 1,
@@ -76,7 +76,7 @@ namespace robotLineFollowing {
                     LineSensor8Pixel.getNotCleanLineCount() != startUncleanCount;
             }
             if (reached) {
-                // Distance mode regards early line loss as a failure.
+                // If stopped before distance reached, success = false
                 success = !distanceLimited;
                 return false;
             }
@@ -102,41 +102,25 @@ namespace robotLineFollowing {
         }, function () { return success; });
     }
 
-    // Returns immediately. Old start(speed) calls retain continuous operation.
     //% blockId="robot_follow_line"
-    //% block="Start linjefølgning med $speed mm/s stop ved $stopCondition"
+    //% block="Start linjefølgning med hastighed $speed mm/s stop ved $stopCondition"
     //% speed.defl=120 speed.min=1 stopCondition.defl=robotLineFollowing.LineStopCondition.Never
     export function start(speed: number, stopCondition: LineStopCondition = LineStopCondition.Never): void {
         beginFollowing(speed, stopCondition, 0, false);
+        if (stopCondition == LineStopCondition.Never) return;
+        waitUntilFinished();
     }
 
-    //% blockId="robot_line_wait" block="Vent til bevægelsen er afsluttet"
+    //% blockId="robot_line_wait" block="Vent til linje følgning er afsluttet"
     export function waitUntilFinished(): void {
         nezhaV2_odometry.waitUntilMotionFinished();
     }
 
-    // Kept for compatibility with the previous blocks.
-    //% advanced=true blockId="robot_follow_until_junction"
-    //% block="Følg linje indtil udgrening eller kryds med $speed mm/s"
-    //% speed.defl=120 speed.min=1
-    export function followUntilJunction(speed: number): void {
-        start(speed, LineStopCondition.JunctionOrCrossing);
-        waitUntilFinished();
-    }
-
-    //% advanced=true blockId="robot_follow_until_lost"
-    //% block="Følg linje indtil ingen linje med $speed mm/s"
-    //% speed.defl=120 speed.min=1
-    export function followUntilLost(speed: number): void {
-        start(speed, LineStopCondition.LineLost);
-        waitUntilFinished();
-    }
-
     //% blockId="robot_follow_distance"
-    //% block="Følg linje $distance mm med $speed mm/s"
+    //% block="Følg linje i $distance mm med hastighed $speed mm/s | stop hvis $stopCondition"
     //% distance.defl=500 distance.min=1 speed.defl=120 speed.min=1
-    export function followDistance(distance: number, speed: number): void {
-        beginFollowing(speed, LineStopCondition.LineLost, distance, true);
+    export function followDistance(distance: number, speed: number, stopCondition: LineStopCondition = LineStopCondition.Never): void {
+        beginFollowing(speed, stopCondition, distance, true);
         waitUntilFinished();
     }
 }
