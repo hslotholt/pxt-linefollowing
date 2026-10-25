@@ -4,8 +4,8 @@
     "description": "",
     "dependencies": {
         "core": "*",
-        "robot": "github:hslotholt/pxt-nezha2-odometry#v1.0.1",
-        "linesensor": "github:hslotholt/pxt-linesensor8pixel#v1.0.0"
+        "robot": "github:hslotholt/pxt-nezha2-odometry#v1.1.0",
+        "linesensor": "github:hslotholt/pxt-linesensor8pixel#v1.1.0"
     },
     "files": [
         "README.md",

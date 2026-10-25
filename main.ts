@@ -13,7 +13,8 @@ namespace robotLineFollowing {
         LineLost = 4,
         //% block="ikke længere ren linje"
         NotCleanLine = 5,
-        //% block="linjetykkelsen halveret"
+        // Existing member/value retained for saved blocks and TypeScript calls.
+        //% block="linjetykkelsen ændret"
         LineWidthHalved = 6
     }
 
@@ -46,7 +47,7 @@ namespace robotLineFollowing {
         let startCrossingCount = LineSensor8Pixel.getCrossingCount();
         let startLossCount = LineSensor8Pixel.getLineLossCount();
         let startUncleanCount = LineSensor8Pixel.getNotCleanLineCount();
-        let startHalfWidthCount = LineSensor8Pixel.getLineWidthHalvedCount();
+        let startWidthChangeCount = LineSensor8Pixel.getLineWidthChangedCount();
         let success = false;
         let receivedSample = false;
         let firstRun = true;
@@ -83,8 +84,8 @@ namespace robotLineFollowing {
                 reached = LineSensor8Pixel.isNotCleanLineConfirmed() ||
                     LineSensor8Pixel.getNotCleanLineCount() != startUncleanCount;
             } else if (stopCondition == LineStopCondition.LineWidthHalved) {
-                reached = LineSensor8Pixel.isLineWidthHalved() ||
-                    LineSensor8Pixel.getLineWidthHalvedCount() != startHalfWidthCount;
+                reached = LineSensor8Pixel.isLineWidthChanged() ||
+                    LineSensor8Pixel.getLineWidthChangedCount() != startWidthChangeCount;
             }
             if (reached) {
                 // An explicitly selected condition is a normal completion,
