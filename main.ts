@@ -12,7 +12,9 @@ namespace robotLineFollowing {
         //% block="ingen linje"
         LineLost = 4,
         //% block="ikke længere ren linje"
-        NotCleanLine = 5
+        NotCleanLine = 5,
+        //% block="linjetykkelsen halveret"
+        LineWidthHalved = 6
     }
 
     let forwardMm = 150;
@@ -44,6 +46,7 @@ namespace robotLineFollowing {
         let startCrossingCount = LineSensor8Pixel.getCrossingCount();
         let startLossCount = LineSensor8Pixel.getLineLossCount();
         let startUncleanCount = LineSensor8Pixel.getNotCleanLineCount();
+        let startHalfWidthCount = LineSensor8Pixel.getLineWidthHalvedCount();
         let success = false;
         let receivedSample = false;
         let firstRun = true;
@@ -79,6 +82,9 @@ namespace robotLineFollowing {
             } else if (stopCondition == LineStopCondition.NotCleanLine) {
                 reached = LineSensor8Pixel.isNotCleanLineConfirmed() ||
                     LineSensor8Pixel.getNotCleanLineCount() != startUncleanCount;
+            } else if (stopCondition == LineStopCondition.LineWidthHalved) {
+                reached = LineSensor8Pixel.isLineWidthHalved() ||
+                    LineSensor8Pixel.getLineWidthHalvedCount() != startHalfWidthCount;
             }
             if (reached) {
                 // An explicitly selected condition is a normal completion,
