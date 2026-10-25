@@ -38,7 +38,7 @@ namespace robotLineFollowing {
         }
         LineSensor8Pixel.initLinesensor8Pixel();
         let started = input.runningTime();
-        let startTrip = nezhaV2_odometry.getTrip();
+        let startTrip = 0;
         let startJunctionCount = LineSensor8Pixel.getJunctionCount();
         let startBranchCount = LineSensor8Pixel.getBranchCount();
         let startCrossingCount = LineSensor8Pixel.getCrossingCount();
@@ -46,8 +46,13 @@ namespace robotLineFollowing {
         let startUncleanCount = LineSensor8Pixel.getNotCleanLineCount();
         let success = false;
         let receivedSample = false;
+        let firstRun = true;
         let lastCurvature = 0;
         nezhaV2_odometry.startExternalController(function () {
+            if (firstRun) {
+                startTrip = nezhaV2_odometry.getTrip();
+                firstRun = false;
+            }
             let now = input.runningTime();
             if (LineSensor8Pixel.getSampleAgeMs() > 100) {
                 // Missing samples are faults, never normal "line lost" events.
