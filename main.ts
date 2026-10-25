@@ -31,7 +31,7 @@ namespace robotLineFollowing {
     }
 
     function beginFollowing(speed: number, stopCondition: LineStopCondition,
-        distance: number, distanceLimited: boolean): void {
+        distance: number, distanceLimited: boolean, endAction: nezhaV2_odometry.EndAction): void {
         if (speed <= 0 || (distanceLimited && distance <= 0)) {
             nezhaV2_odometry.stop();
             return;
@@ -50,7 +50,7 @@ namespace robotLineFollowing {
         let lastCurvature = 0;
         nezhaV2_odometry.startExternalController(function () {
             if (firstRun) {
-                startTrip = nezhaV2_odometry.getTrip();
+                startTrip = nezhaV2_odometry.getMotionStartTrip();
                 firstRun = false;
             }
             let now = input.runningTime();
@@ -81,12 +81,14 @@ namespace robotLineFollowing {
                     LineSensor8Pixel.getNotCleanLineCount() != startUncleanCount;
             }
             if (reached) {
-                // If stopped before distance reached, success = false
-                success = !distanceLimited;
+                // An explicitly selected condition is a normal completion,
+                // including when it ends a distance command early.
+                success = true;
                 return false;
             }
             let remaining = distance - (nezhaV2_odometry.getTrip() - startTrip);
-            if (distanceLimited && remaining <= 2) {
+            let distanceTolerance = endAction == nezhaV2_odometry.EndAction.Continue ? 0 : 2;
+            if (distanceLimited && remaining <= distanceTolerance) {
                 success = true;
                 return false;
             }
@@ -101,17 +103,19 @@ namespace robotLineFollowing {
             // If the line is absent, keep the last valid steering until the
             // selected confirmed stop condition occurs. Never means continue;
             // before any valid line has been seen, the default is straight.
-            let requestedSpeed = distanceLimited ? Math.min(speed, Math.max(0, 3 * remaining)) : speed;
+            let slowDown = distanceLimited && endAction == nezhaV2_odometry.EndAction.Stop;
+            let requestedSpeed = slowDown ? Math.min(speed, Math.max(0, 3 * remaining)) : speed;
             nezhaV2_odometry.setExternalVelocity(requestedSpeed, requestedSpeed * lastCurvature);
             return true;
-        }, function () { return success; });
+        }, function () { return success; }, endAction);
     }
 
     //% blockId="robot_follow_line"
-    //% block="Start linjefølgning med hastighed $speed mm/s stop ved $stopCondition"
+    //% block="Start linjefølgning med hastighed $speed mm/s afslut ved $stopCondition || ved afslutning $endAction"
     //% speed.defl=120 speed.min=1 stopCondition.defl=robotLineFollowing.LineStopCondition.Never
-    export function start(speed: number, stopCondition: LineStopCondition = LineStopCondition.Never): void {
-        beginFollowing(speed, stopCondition, 0, false);
+    export function start(speed: number, stopCondition: LineStopCondition = LineStopCondition.Never,
+        endAction: nezhaV2_odometry.EndAction = nezhaV2_odometry.EndAction.Stop): void {
+        beginFollowing(speed, stopCondition, 0, false, endAction);
         if (stopCondition == LineStopCondition.Never) return;
         waitUntilFinished();
     }
@@ -122,10 +126,11 @@ namespace robotLineFollowing {
     }
 
     //% blockId="robot_follow_distance"
-    //% block="Følg linje i $distance mm med hastighed $speed mm/s | stop hvis $stopCondition"
+    //% block="Følg linje i $distance mm med hastighed $speed mm/s || afslut hvis $stopCondition || ved afslutning $endAction"
     //% distance.defl=500 distance.min=1 speed.defl=120 speed.min=1
-    export function followDistance(distance: number, speed: number, stopCondition: LineStopCondition = LineStopCondition.Never): void {
-        beginFollowing(speed, stopCondition, distance, true);
+    export function followDistance(distance: number, speed: number, stopCondition: LineStopCondition = LineStopCondition.Never,
+        endAction: nezhaV2_odometry.EndAction = nezhaV2_odometry.EndAction.Stop): void {
+        beginFollowing(speed, stopCondition, distance, true, endAction);
         waitUntilFinished();
     }
 }
