@@ -133,7 +133,7 @@ namespace robotLineFollowing {
     }
 
     //% blockId="robot_follow_distance"
-    //% block="Følg linje i $distance mm med hastighed $speed mm/s || afslut hvis $stopCondition || ved afslutning $endAction"
+    //% block="Følg linje i $distance mm med hastighed $speed mm/s || afslut hvis $stopCondition ved afslutning $endAction"
     //% distance.defl=500 distance.min=1 speed.defl=120 speed.min=1
     export function followDistance(distance: number, speed: number, stopCondition: LineStopCondition = LineStopCondition.Never,
         endAction: nezhaV2_odometry.EndAction = nezhaV2_odometry.EndAction.Stop): void {
